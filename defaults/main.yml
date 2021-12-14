@@ -1,0 +1,96 @@
+---
+# defaults file for ansible-mattermost
+
+# mattermost_base_ip: "{{ ansible_enp0s8.ipv4.address }}"
+mattermost_base_ip: "127.0.0.1"
+
+mattermost_user:
+  name: "mattermost"
+  group: "mattermost"
+
+mattermost_version: "6.1.0"
+
+mm_paths:
+  base: "/var/www/mattermost/"
+  db: "/var/www/mattermost/db/"
+  utils: "/var/www/mattermost/db/utils"
+  log: "/var/www/mattermost/db/log"
+  data: "/var/www/mattermost/db/data"
+
+mattermost_db_packages:
+  - mariadb-server
+  - mariadb-client
+  - python3-mysqldb
+
+mattermost_config:
+  sql_driver: "mysql"
+  data_source: "\
+    {{ mattermost_db_user.name }}:\
+    {{ mattermost_db_user.password }}@tcp(\
+    {{ mattermost_base_ip }}:3306)/mattermost_db?charset=utf8mb4,utf8&writeTimeout=30s"
+  site_url: "https://mattermost.cyberrange.at"
+  PasswordSettings:
+    MinimumLength: 10
+    Lowercase: true
+    Number: true
+    Uppercase: true
+    Symbol: true
+  DefaultTheme: "Onyx"
+  EnableLocalMode: true
+
+mattermost_db_mysql_root_password: "root"
+
+mattermost_db_user:
+  name: "{{ mattermost_user.name }}"
+  password: "secret"
+
+mattermost_db_database:
+  name: "mattermost_db"
+
+mattermost_service:
+  name: "mattermost"
+  Description: "mattermost"
+  After: "network.target"
+  BindsTo: "mysql.service"
+  WantedBy: "mysql.service"
+  User: "{{ mattermost_user.name }}"
+  Group: "{{ mattermost_user.group }}"
+  WorkingDirectory: "{{ mm_paths.base }}"
+  ExecStart: >
+    {{ mm_paths.base }}/bin/mattermost
+  state: restarted
+  autostart: yes
+  reload: yes
+
+mattermost_mysql_secure_installation_responses:
+    '(.*)Enter current password for root(.*)': '{{ mattermost_db_mysql_root_password }}'
+    '(.*)Set root password?(.*)': 'y'
+    '(.*)Change the root password?(.*)': 'y'
+    '(.*)New password(.*)': '{{ mattermost_db_mysql_root_password }}'
+    '(.*)Re-enter new password(.*)': '{{ mattermost_db_mysql_root_password }}'
+    '(.*)Remove anonymous users?(.*)': 'y'
+    '(.*)Disallow root login remotely?(.*)': 'y'
+    '(.*)Remove test database and access to it?(.*)': 'y'
+    '(.*)Reload privilege tables now?(.*)': 'y'
+
+mattermost_config_sys_admin:
+  email: "admin@cyberrange.at"
+  username: "mm_admin"
+  password: "Password123"
+  firstname: "mm_firstname"
+  lastname: "mm_lastname"
+
+mattermost_config_team:
+  name: "cr-support-team"
+  email: "admin@cyberrange.at"
+  display_name: "CyberRange Support Team"
+  private: false
+  force: true
+
+mattermost_config_channel:
+  name: "cr-support-channel"
+  display_name: "CyberRange Support Channel"
+  header: "Technical support"
+  team: "{{ mattermost_config_team.name }}"
+  private: false
+  force: true
