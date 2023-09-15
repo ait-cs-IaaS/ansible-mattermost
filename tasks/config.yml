@@ -1,0 +1,36 @@
+---
+- name: Ensure python and pip is installed
+  become: true
+  ansible.builtin.apt:
+      name: '{{ item }}'
+      state: present
+      update_cache: true
+      cache_valid_time: 3600
+  loop:
+      - python3.9
+      - python3-pip
+
+- name: Deploy mattermost init script
+  become: true
+  ansible.builtin.template:
+      src: '{{ mattermost_init_script_src }}'
+      dest: '{{ mattermost_basepath }}/init.py'
+      owner: root
+      group: root
+      mode: '+x'
+
+- name: Copy mattermost user config
+  become: true
+  ansible.builtin.copy:
+      src: '{{ mattermost_init_config_src }}'
+      dest: '{{ mattermost_basepath }}/init.yml'
+      mode: '644'
+      remote_src: '{{ mattermost_init_config_remote_source }}'
+
+- name: Install pip modules
+  ansible.builtin.pip:
+      name: '{{ mattermost_init_script_packages }}'
+
+- name: Run init script
+  ansible.builtin.command:
+      cmd: 'python3 {{ mattermost_basepath }}/init.py'

@@ -1,96 +1,27 @@
----
-# defaults file for ansible-mattermost
+mattermost_site_url: ''
 
-# mattermost_base_ip: "{{ ansible_enp0s8.ipv4.address }}"
-mattermost_base_ip: "127.0.0.1"
+mattermost_basepath: /opt/mattermost
 
-mattermost_user:
-  name: "mattermost"
-  group: "mattermost"
+mattermost_service_user: mattermost
+mattermost_service_user_password: 54908deb3b3f4f46ddc6dd
 
-mattermost_version: "6.1.0"
+mattermost_database_user: mmuser
+mattermost_database_user_password: 869bdaebff3d4f46d1384fd
 
-mm_paths:
-  base: "/var/www/mattermost/"
-  db: "/var/www/mattermost/db/"
-  utils: "/var/www/mattermost/db/utils"
-  log: "/var/www/mattermost/db/log"
-  data: "/var/www/mattermost/db/data"
+mattermost_database_driver: postgres
+mattermost_database_host: localhost
+mattermost_database_name: mattermost
 
-mattermost_db_packages:
-  - mariadb-server
-  - mariadb-client
-  - python3-mysqldb
+mattermost_init_config_src: 'templates/init-mattermost-config.yml.j2'
+mattermost_init_config_remote_source: false
 
-mattermost_config:
-  sql_driver: "mysql"
-  data_source: "\
-    {{ mattermost_db_user.name }}:\
-    {{ mattermost_db_user.password }}@tcp(\
-    {{ mattermost_base_ip }}:3306)/mattermost_db?charset=utf8mb4,utf8&writeTimeout=30s"
-  site_url: "https://mattermost.cyberrange.at"
-  PasswordSettings:
-    MinimumLength: 10
-    Lowercase: true
-    Number: true
-    Uppercase: true
-    Symbol: true
-  DefaultTheme: "Onyx"
-  EnableLocalMode: true
+mattermost_init_script_src: 'templates/init-mattermost.py.j2'
+mattermost_init_script_packages: [mattermostdriver, requests, pyyaml]
 
-mattermost_db_mysql_root_password: "root"
+mattermost_ssl_cert: '/etc/ssl/mattermost.crt'
+mattermost_ssl_key: '/etc/ssl/mattermost.key'
 
-mattermost_db_user:
-  name: "{{ mattermost_user.name }}"
-  password: "secret"
+mattermost_ssl_cert_src: 'files/ssl.crt'
+mattermost_ssl_key_src: 'files/ssl.key'
 
-mattermost_db_database:
-  name: "mattermost_db"
-
-mattermost_service:
-  name: "mattermost"
-  Description: "mattermost"
-  After: "network.target"
-  BindsTo: "mysql.service"
-  WantedBy: "mysql.service"
-  User: "{{ mattermost_user.name }}"
-  Group: "{{ mattermost_user.group }}"
-  WorkingDirectory: "{{ mm_paths.base }}"
-  ExecStart: >
-    {{ mm_paths.base }}/bin/mattermost
-  state: restarted
-  autostart: yes
-  reload: yes
-
-mattermost_mysql_secure_installation_responses:
-    '(.*)Enter current password for root(.*)': '{{ mattermost_db_mysql_root_password }}'
-    '(.*)Set root password?(.*)': 'y'
-    '(.*)Change the root password?(.*)': 'y'
-    '(.*)New password(.*)': '{{ mattermost_db_mysql_root_password }}'
-    '(.*)Re-enter new password(.*)': '{{ mattermost_db_mysql_root_password }}'
-    '(.*)Remove anonymous users?(.*)': 'y'
-    '(.*)Disallow root login remotely?(.*)': 'y'
-    '(.*)Remove test database and access to it?(.*)': 'y'
-    '(.*)Reload privilege tables now?(.*)': 'y'
-
-mattermost_config_sys_admin:
-  email: "admin@cyberrange.at"
-  username: "mm_admin"
-  password: "Password123"
-  firstname: "mm_firstname"
-  lastname: "mm_lastname"
-
-mattermost_config_team:
-  name: "cr-support-team"
-  email: "admin@cyberrange.at"
-  display_name: "CyberRange Support Team"
-  private: false
-  force: true
-
-mattermost_config_channel:
-  name: "cr-support-channel"
-  display_name: "CyberRange Support Channel"
-  header: "Technical support"
-  team: "{{ mattermost_config_team.name }}"
-  private: false
-  force: true
+mattermost_server_name: mattermost.cyberrange.rocks

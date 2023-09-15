@@ -1,6 +1,0 @@
----
-
-- src: https://github.com/GROG/ansible-role-user.git
-  scm: git
-  version: master
-  name: grog.user

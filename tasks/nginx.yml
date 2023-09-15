@@ -1,0 +1,32 @@
+---
+- name: Install Nginx
+  become: true
+  ansible.builtin.apt:
+      name: nginx
+      state: present
+      update_cache: true
+      cache_valid_time: 3600
+
+- name: Deploy mattermost certs
+  become: true
+  ansible.builtin.copy:
+      src: '{{ ssl_cert_src }}'
+      dest: '{{ mattermost_ssl_cert }}'
+      mode: '0644'
+
+- name: Deploy mattermost keys
+  become: true
+  ansible.builtin.copy:
+      src: '{{ ssl_key_src }}'
+      dest: '{{ mattermost_ssl_key}}'
+      mode: '0600'
+
+- name: Deploy nginx config
+  become: true
+  ansible.builtin.template:
+      src: templates/nginx.conf.j2
+      dest: /etc/nginx/conf.d/mattermost.conf
+      owner: root
+      group: root
+      mode: '0600'
+  notify: Restart nginx
