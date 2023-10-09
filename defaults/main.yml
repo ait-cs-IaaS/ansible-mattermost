@@ -1,4 +1,5 @@
-mattermost_site_url: ''
+mattermost_site_url: ""
+mattermost_url: "http://localhost:8065"
 
 mattermost_basepath: /opt/mattermost
 
@@ -12,16 +13,16 @@ mattermost_database_driver: postgres
 mattermost_database_host: localhost
 mattermost_database_name: mattermost
 
-mattermost_init_config_src: 'templates/init-mattermost-config.yml.j2'
+mattermost_init_config_src: "templates/init-mattermost-config.yml.j2"
 mattermost_init_config_remote_source: false
 
-mattermost_init_script_src: 'templates/init-mattermost.py.j2'
-mattermost_init_script_packages: [mattermostdriver, requests, pyyaml]
+mattermost_init_script_src: "templates/init-mattermost.py.j2"
+mattermost_init_script_packages: [requests, pyyaml, mattermostdriver]
 
-mattermost_ssl_cert: '/etc/ssl/mattermost.crt'
-mattermost_ssl_key: '/etc/ssl/mattermost.key'
+mattermost_ssl_cert: "/etc/ssl/mattermost.crt"
+mattermost_ssl_key: "/etc/ssl/mattermost.key"
 
-mattermost_ssl_cert_src: 'files/ssl.crt'
-mattermost_ssl_key_src: 'files/ssl.key'
+mattermost_ssl_cert_src: "files/ssl.crt"
+mattermost_ssl_key_src: "files/ssl.key"
 
 mattermost_server_name: mattermost.cyberrange.rocks
