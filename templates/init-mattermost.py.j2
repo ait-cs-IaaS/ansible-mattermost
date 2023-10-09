@@ -30,7 +30,7 @@ for username, userdetails in learners_users.items():
 
     users.append(user)
 
-    user_teams = userdetails.get("meta", {}).get("teams", {})
+    user_teams = userdetails.get("meta", {}).get("mattermost", {}).get("teams", {})
 
     for team, team_details in user_teams.items():
         if not teams.get(team):
@@ -43,7 +43,7 @@ for username, userdetails in learners_users.items():
             }
         teams[team]["users"].append(username)
 
-        for channel in team_details.get("channels"):
+        for channel in team_details.get("channels", []):
             if not teams.get(team).get("channels").get(channel):
                 teams[team]["channels"][channel] = {
                     "name": channel.lower(),
@@ -61,7 +61,7 @@ for username, userdetails in learners_users.items():
 # Wait for Mattermost server to start
 while True:
     try:
-        response = requests.get("http://localhost:8065/api/v4/system/ping")
+        response = requests.get("http://127.0.0.1:8065/api/v4/system/ping")
         response.raise_for_status()
         if response.status_code == 200:
             break
@@ -72,12 +72,12 @@ while True:
 
 # Create initial admin user
 requests.post(
-    "http://localhost:8065/api/v4/users",
+    "http://127.0.0.1:8065/api/v4/users",
     json={
         "email": "admin@learners.rocks",
         "password": "mozart.rocks!",
         "username": "admin",
-    },
+    }
 )
 
 driver = Driver(
