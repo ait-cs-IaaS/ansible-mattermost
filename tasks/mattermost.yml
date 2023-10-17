@@ -2,7 +2,7 @@
 - name: Create mattermost installation dirs
   become: true
   ansible.builtin.file:
-      name: '{{ mattermost_basepath}}'
+      name: '{{ mattermost_basepath }}'
       state: directory
 
 - name: Download Mattermost repository setup script

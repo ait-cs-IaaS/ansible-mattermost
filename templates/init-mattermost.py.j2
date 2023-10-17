@@ -99,6 +99,7 @@ driver.login()
 
 for user in users:
     try:
+        print(f"creating user { user }")
         driver.users.create_user(user)
     except:
         pass
@@ -109,6 +110,7 @@ for user in users:
 
 for admin in admins:
     try:
+        print(f"adding user { admin } to admins")
         user_id = driver.users.get_user_by_username(admin)["id"]
         driver.users.update_user_role(user_id, {"roles": "system_admin system_user"})
     except:
@@ -119,28 +121,54 @@ for admin in admins:
 #############################################
 
 for _, team in teams.items():
+    team_id = None
+    user_id = None
+    channel_id = None
+
     try:
         # Create Team
-        team_id = driver.teams.create_team(team)["id"]
+        print(f"TEAM: { team.get('name') }")
+        team_id = driver.teams.get_team_by_name(team.get('name'))["id"]
+        print(f"current team: { team_id }")
+    except:
+        pass
+
+        if not team_id:
+            print(f"creating team { team.get('name') }")
+            team_id = driver.teams.create_team(team)["id"]
 
         # Add members to team
         for member in team.get("users"):
-            user_id = driver.users.get_user_by_username(member)["id"]
-            driver.teams.add_user_to_team(
-                team_id, {"team_id": team_id, "user_id": user_id}
-            )
+            try:
+                print(f"adding user { member } to { team.get('name') }")
+                user_id = driver.users.get_user_by_username(member)["id"]
+                driver.teams.add_user_to_team(
+                    team_id, {"team_id": team_id, "user_id": user_id}
+                )
+                print(f"added user { member } to { team.get('name') }")
+            except:
+                pass
 
         # Create channels
         for _, channel in team.get("channels").items():
             channel["team_id"] = team_id
-            channel_id = driver.channels.create_channel(channel)["id"]
+
+            try:
+                channel_id = driver.channels.get_channel_by_name_and_team_name(team.get('name'), channel.get('name'))["id"]
+            except:
+                pass
+
+            if not channel_id:
+                channel_id = driver.channels.create_channel(channel)["id"]
+                print(f"added channel { channel.get('name') } to { team.get('name') }")
 
             # Add members to channel
-            for member in channel.get("users"):
-                user_id = driver.users.get_user_by_username(member)["id"]
-                driver.channels.add_user(channel_id, {"user_id": user_id})
-
-    except:
-        pass
+            for member in channel.get("users"):            
+                try:
+                    user_id = driver.users.get_user_by_username(member)["id"]
+                    driver.channels.add_user(channel_id, {"user_id": user_id})
+                    print(f"added member { member } to Team: { team.get('name') } - Channel: { channel.get('name') }")
+                except:
+                    pass
 
 driver.logout()
