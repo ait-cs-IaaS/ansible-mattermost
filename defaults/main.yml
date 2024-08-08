@@ -17,7 +17,6 @@ mattermost_init_config_src: "templates/init-mattermost-config.yml.j2"
 mattermost_init_config_remote_source: false
 
 mattermost_init_script_src: "templates/init-mattermost.py.j2"
-mattermost_init_script_packages: [requests, pyyaml, mattermostdriver]
 
 mattermost_ssl_cert: "/etc/ssl/mattermost.crt"
 mattermost_ssl_key: "/etc/ssl/mattermost.key"

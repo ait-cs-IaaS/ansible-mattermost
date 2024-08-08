@@ -5,21 +5,7 @@
       name: nginx
       state: present
       update_cache: true
-      cache_valid_time: 3600
-
-- name: Deploy mattermost certs
-  become: true
-  ansible.builtin.copy:
-      src: '{{ ssl_cert_src }}'
-      dest: '{{ mattermost_ssl_cert }}'
-      mode: '0644'
-
-- name: Deploy mattermost keys
-  become: true
-  ansible.builtin.copy:
-      src: '{{ ssl_key_src }}'
-      dest: '{{ mattermost_ssl_key}}'
-      mode: '0600'
+      cache_valid_time: 7200
 
 - name: Deploy nginx config
   become: true

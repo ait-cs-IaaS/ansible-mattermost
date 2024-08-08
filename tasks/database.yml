@@ -2,14 +2,12 @@
 - name: Install PostgreSQL and its dependencies
   become: true
   ansible.builtin.apt:
-      name: '{{ item }}'
-      state: present
+      name: 
+        - postgresql
+        - postgresql-contrib
+        - python3-psycopg2
       update_cache: true
-      cache_valid_time: 3600
-  loop:
-      - postgresql
-      - postgresql-contrib
-      - python3-psycopg2
+      cache_valid_time: 7200
 
 - name: Start and enable PostgreSQL service
   become: true
@@ -18,17 +16,11 @@
       enabled: true
       state: started
 
-# postgres://mmuser:<mmuser-password>@<host-name-or-IP>:5432/mattermost?sslmode=disable&connect_timeout=10
-
 - name: Create a PostgreSQL database and user
   become: true
   become_user: postgres
   community.postgresql.postgresql_db:
       name: '{{ mattermost_database_name }}'
-      # owner: '{{ mattermost_database_user }}'
-      # login_host: localhost
-      # login_user: '{{ mattermost_service_user }}'
-      # login_password: '{{ mattermost_service_user_password }}'
 
 - name: Set PostgreSQL password for the user
   become: true
@@ -36,11 +28,6 @@
   community.postgresql.postgresql_user:
       name: '{{ mattermost_database_user }}'
       password: '{{ mattermost_database_user_password}}'
-      # priv: ALL
-      # db: '{{ mattermost_database_name }}'
-      # login_host: localhost
-      # login_user: '{{ mattermost_service_user }}'
-      # login_password: '{{ mattermost_service_user_password }}'
 
 - name:
       GRANT ALL PRIVILEGES ON DATABASE {{ mattermost_database_name }} TO {{
@@ -78,22 +65,3 @@
       replace: '\1\2trust\4'
       backup: true
   notify: Reload postgres
-# - name: Install dependency packages
-#   apt:
-#     name: "{{item}}"
-#     state: installed
-#   with_items:
-#     - 'icinga2-ido-pgsql'
-#     - 'python-psycopg2'
-
-# - name: Add database for mattermost
-#   postgresql_db:
-#     name: "{{ mattermost_database_name }}"
-#   become_user: postgres
-
-# - name: Add mattermost database user
-#   postgresql_user:
-#     name: "{{ mattermost_database_user }}"
-#     password: "{{ mattermost_database_password }}"
-#     db: "{{ mattermost_database_name }}"
-#   become_user: postgres
