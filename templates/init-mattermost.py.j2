@@ -19,7 +19,7 @@ teams = {}
 
 for username, userdetails in learners_users.items():
     user = {
-        "username": username,
+        "username": userdetails.get("mattermost_user", userdetails.get("username")),
         "password": userdetails.get("password"),
         "first_name": userdetails.get("meta", {}).get("first_name", ""),
         "last_name": userdetails.get("meta", {}).get("last_name", ""),
@@ -134,42 +134,42 @@ for _, team in teams.items():
     except:
         pass
 
-        if not team_id:
-            print(f"creating team { team.get('name') }")
-            team_id = driver.teams.create_team(team)["id"]
+    if not team_id:
+        print(f"creating team { team.get('name') }")
+        team_id = driver.teams.create_team(team)["id"]
 
-        # Add members to team
-        for member in team.get("users"):
+    # Add members to team
+    for member in team.get("users"):
+        try:
+            print(f"adding user { member } to { team.get('name') }")
+            user_id = driver.users.get_user_by_username(member)["id"]
+            driver.teams.add_user_to_team(
+                team_id, {"team_id": team_id, "user_id": user_id}
+            )
+            print(f"added user { member } to { team.get('name') }")
+        except:
+            pass
+
+    # Create channels
+    for _, channel in team.get("channels").items():
+        channel["team_id"] = team_id
+
+        try:
+            channel_id = driver.channels.get_channel_by_name_and_team_name(team.get('name'), channel.get('name'))["id"]
+        except:
+            pass
+
+        if not channel_id:
+            channel_id = driver.channels.create_channel(channel)["id"]
+            print(f"added channel { channel.get('name') } to { team.get('name') }")
+
+        # Add members to channel
+        for member in channel.get("users"):            
             try:
-                print(f"adding user { member } to { team.get('name') }")
                 user_id = driver.users.get_user_by_username(member)["id"]
-                driver.teams.add_user_to_team(
-                    team_id, {"team_id": team_id, "user_id": user_id}
-                )
-                print(f"added user { member } to { team.get('name') }")
+                driver.channels.add_user(channel_id, {"user_id": user_id})
+                print(f"added member { member } to Team: { team.get('name') } - Channel: { channel.get('name') }")
             except:
                 pass
-
-        # Create channels
-        for _, channel in team.get("channels").items():
-            channel["team_id"] = team_id
-
-            try:
-                channel_id = driver.channels.get_channel_by_name_and_team_name(team.get('name'), channel.get('name'))["id"]
-            except:
-                pass
-
-            if not channel_id:
-                channel_id = driver.channels.create_channel(channel)["id"]
-                print(f"added channel { channel.get('name') } to { team.get('name') }")
-
-            # Add members to channel
-            for member in channel.get("users"):            
-                try:
-                    user_id = driver.users.get_user_by_username(member)["id"]
-                    driver.channels.add_user(channel_id, {"user_id": user_id})
-                    print(f"added member { member } to Team: { team.get('name') } - Channel: { channel.get('name') }")
-                except:
-                    pass
 
 driver.logout()
