@@ -17,9 +17,12 @@ admins = []
 users = []
 teams = {}
 
+
 for username, userdetails in learners_users.items():
+    if userdetails.get("meta", {}).get("mattermost_user"):
+        username = userdetails.get("meta", {}).get("mattermost_user")
     user = {
-        "username": userdetails.get("mattermost_user", userdetails.get("username")),
+        "username": username,
         "password": userdetails.get("password"),
         "first_name": userdetails.get("meta", {}).get("first_name", ""),
         "last_name": userdetails.get("meta", {}).get("last_name", ""),
@@ -28,7 +31,8 @@ for username, userdetails in learners_users.items():
         "send_email": False,
     }
 
-    users.append(user)
+    if not "attacker" in user["username"]:
+        users.append(user)
 
     user_teams = userdetails.get("meta", {}).get("mattermost", {}).get("teams", {})
 
