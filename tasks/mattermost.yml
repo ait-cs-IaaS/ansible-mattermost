@@ -19,7 +19,8 @@
 - name: Update apt repo and install mattermost
   become: true
   ansible.builtin.apt:
-      name: mattermost
+      name: mattermost={{ mattermost_version }}
+      allow_downgrade: true
       update_cache: true
       cache_valid_time: 7200
 
