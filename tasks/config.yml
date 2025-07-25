@@ -43,6 +43,8 @@
     name: mattermost
     state: started
     enabled: true
+  retries: 12
+  delay: 10
 
 - name: Run init script
   become: true
